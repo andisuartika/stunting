@@ -2,8 +2,10 @@
 
 namespace App\Http\Livewire;
 
+use App\Models\IbuPeriksa;
 use App\Models\Peserta;
 use App\Models\Posyandu;
+use Carbon\Carbon;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Auth;
@@ -14,6 +16,7 @@ class CalonIbuIndex extends Component
     use WithFileUploads;
 
     public $idPeserta;
+    public $idPeriksa;
     public $nama;
     public $nik;
     public $tglLahir;
@@ -32,7 +35,6 @@ class CalonIbuIndex extends Component
     public $peserta;
     public $query= '';
     public int $selectedPeserta = 0;
-    public int $highlightIndex = 0;
     public bool $showDropdown;
     public bool $showDataPeserta;
     public bool $isLoading = false;
@@ -41,12 +43,54 @@ class CalonIbuIndex extends Component
         'selectPerserta' => 'selectPerserta',
     ];
 
+
+    // ERROR MESS
+    protected $messages = [
+        'nama.required' => 'Nama calon ibu tidak boleh kosong.',
+        'nik.required' => 'NIK tidak boleh kosong.',
+        'nik.min' => 'NIK harus 16 karakter.',
+        'tglLahir.required' => 'Tanggal Lahir tidak boleh kosong.',
+        'file.required' => 'Silahkan upload kartu keluarga.',
+        'posyanduID.required' => 'Silahkan pilih posyandu.',
+        'umur.required' => 'Umur tidak boleh kosong',
+        'beratBadan.required' => 'Berat badan tidak boleh kosong',
+        'tinggiBadan.required' => 'Tinggi badan tidak boleh kosong',
+        'lingkarPinggang.required' => 'Lingkar pinggang tidak boleh kosong',
+        'lingkarBokong.required' => 'Lingkar bokong tidak boleh kosong',
+        'lingkarLengan.required' => 'Lingkar lengan tidak boleh kosong',
+    ];
+
     public function render()
     {   
         // GET DATA POSYANDU PETUGAS
         $user = Auth::user()->posyanduID;
         $decode = json_decode($user);
         $posyandu = Posyandu::whereIn('posyanduID', $decode)->get();
+
+        // GET DATA PERIKSA PERIODE
+        if($this->peserta)
+        {
+            $year = Carbon::now()->year; 
+            $periksa = IbuPeriksa::where('pesertaID',$this->idPeserta)->whereYear('created_at',$year)->where('periode',(int)$this->periode)->first();
+            if($periksa)
+            {
+                $this->idPeriksa = $periksa->periksaID;
+                $this->umur = $periksa->umur;
+                $this->lingkarPinggang = $periksa->lingkarPinggang;
+                $this->lingkarBokong = $periksa->lingkarBokong;
+                $this->lingkarLengan = $periksa->lingkarLengan;
+                $this->tinggiBadan = $periksa->tinggiBadan;
+                $this->beratBadan = $periksa->beratBadan;
+            }else{
+                $this->idPeriksa = '';
+                $this->umur = '';
+                $this->lingkarPinggang = '';
+                $this->lingkarBokong = '';
+                $this->lingkarLengan = '';
+                $this->tinggiBadan = '';
+                $this->beratBadan = '';
+            }
+        }
         
         return view('livewire.calon-ibu-index',['posyandu' => $posyandu]);
     }
@@ -69,7 +113,7 @@ class CalonIbuIndex extends Component
 
     public function updatedQuery()
     {
-        $this->pesertas = Peserta::where('jenisKelamin', 'P')->where('nama', 'like', '%' . $this->query. '%')->orWhere('NIK','like', '%' . $this->query. '%')
+        $this->pesertas = Peserta::whereYear('tanggalLahir','<',2010)->where('jenisKelamin', 'P')->where('nama', 'like', '%' . $this->query. '%')->orWhere('NIK','like', '%' . $this->query. '%')
             ->take(5)
             ->get()
             ->toArray();
@@ -81,13 +125,13 @@ class CalonIbuIndex extends Component
         $this->peserta= Peserta::where('pesertaID',$pesertaID)->first();
 
         if($this->peserta){
-
             $this->nik = $this->peserta->NIK;
             $this->nama = $this->peserta->nama;
             $this->tglLahir = $this->peserta->tanggalLahir;
             $this->idPeserta = $this->peserta->pesertaID;
             $this->query = '';
             $this->urlFile = $this->peserta->fileBukti;
+            $this->selectedPeserta = $this->peserta->pesertaID;
         }else{
             $this->nik = '';
             $this->tglLahir = '';
@@ -98,35 +142,16 @@ class CalonIbuIndex extends Component
     
     }
 
-    public function incrementHighlight()
-    {
-        if ($this->highlightIndex === count($this->accounts) - 1) {
-            $this->highlightIndex = 0;
-            return;
-        }
-
-        $this->highlightIndex++;
-    }
-
-    public function decrementHighlight()
-    {
-        if ($this->highlightIndex === 0) {
-            $this->highlightIndex = count($this->accounts) - 1;
-            return;
-        }
-
-        $this->highlightIndex--;
-    }
 
     public function submitPeserta()
     {
+        
         $this->validate([
             'nama' => ['required'],
-            'nik' => ['required'],
+            'nik' => ['required','min:16'],
             'tglLahir' => ['required'],
         ]);
 
-        // $this->isLoading = true;
 
         $calonIbu = Peserta::where('pesertaID', $this->idPeserta)->first(); 
         if($calonIbu){
@@ -153,7 +178,7 @@ class CalonIbuIndex extends Component
             $this->validate([
                 'file' => ['required','image'],
             ]);
-
+            
             $fileBukti = '';
             $filename = 'KK-'.$this->nik;
             if(!empty($this->file)){
@@ -176,27 +201,60 @@ class CalonIbuIndex extends Component
 
             $this->selectPeserta($peserta->pesertaID);
         }
-        // $this->isLoading = false;
         $this->dispatchBrowserEvent('swal:modalSuccess');
 
     }
 
     public function store()
     {   
-        dd($this->periode);
-        $calonIbu = Peserta::where('pesertaID', $this->idPeserta)->first(); 
+        $this->validate([
+            'posyanduID' => ['required'],
+            'periode' => ['required'],
+            'umur' => ['required','numeric'],
+            'lingkarPinggang' => ['required','numeric'],
+            'lingkarBokong' => ['required','numeric'],
+            'lingkarLengan' => ['required','numeric'],
+            'tinggiBadan' => ['required','numeric'],
+            'beratBadan' => ['required','numeric'],
+        ]); 
 
+        
+        if($this->idPeriksa)
+        {
+            // UPDATE
+            $ibuPeriksa = IbuPeriksa::where('periksaID',$this->idPeriksa)->first();
+            
+            $ibuPeriksa->posyanduID = $this->posyanduID;
+            $ibuPeriksa->periode = $this->periode;
+            $ibuPeriksa->umur = $this->umur;
+            $ibuPeriksa->lingkarPinggang = $this->lingkarPinggang;
+            $ibuPeriksa->lingkarBokong = $this->lingkarBokong;
+            $ibuPeriksa->lingkarLengan = $this->lingkarLengan;
+            $ibuPeriksa->tinggiBadan = $this->tinggiBadan;
+            $ibuPeriksa->beratBadan = $this->beratBadan;
+            $ibuPeriksa->userID = Auth::user()->id;
 
-        // $ibuPeriksa = IbuPeriksa::create([
-        //     'pesertaID' => $this->idPeserta,
-        //     'umur' => $this->umur,
-        //     'lingkarPinggang' => $this->lingkarPinggang,
-        //     'lingkarBokong' => $this->lingkarBokong,
-        //     'lingkarLengan' => $this->lingkarLengan,
-        //     'tinggiBadan' => $this->tinggiBadan,
-        //     'beratBadan' => $this->beratBadan,
-        // ]);
+            $ibuPeriksa->save();
 
+        }
+        else
+        {
+            // CREATE
+            $ibuPeriksa =  IbuPeriksa::create([
+                'posyanduID' => $this->posyanduID,
+                'pesertaID' => $this->idPeserta,
+                'periode' => $this->periode,
+                'umur' => $this->umur,
+                'lingkarPinggang' => $this->lingkarPinggang,
+                'lingkarBokong' => $this->lingkarBokong,
+                'lingkarLengan' => $this->lingkarLengan,
+                'tinggiBadan' => $this->tinggiBadan,
+                'beratBadan' => $this->beratBadan,
+                'userID' => Auth::user()->id,
+            ]);
+
+            $this->periode = $ibuPeriksa->periode;
+        }
 
         $this->dispatchBrowserEvent('swal:modalSuccess');
 
@@ -214,8 +272,6 @@ class CalonIbuIndex extends Component
         $this->file='';
         $this->urlFile='';
     }
-
-    
 
 
 }

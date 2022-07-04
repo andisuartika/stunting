@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class IbuPeriksa extends Model
 {
     use HasFactory;
-
+    public $primaryKey = 'periksaID';
     protected $guarded = [];
 
     public function peserta()

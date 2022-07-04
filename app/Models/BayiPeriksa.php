@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class BayiPeriksa extends Model
 {
     use HasFactory;
+    protected $primaryKey = 'periksaID';
     protected $guarded = [];
 
     public function peserta()

@@ -11,8 +11,4 @@ class DashboardController extends Component
         return view('livewire.dashboard-controller');
     }
 
-    public function action()
-    {
-        dd('action');
-    }
 }

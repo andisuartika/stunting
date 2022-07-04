@@ -60,7 +60,7 @@
                                 </div>
                                 <div class="mt-3">
                                     <label class="flex flex-col sm:flex-row"> NIK <span class="sm:ml-auto mt-1 sm:mt-0 text-xs text-gray-600">Required, NIK sesuai dengan KTP</span> </label>
-                                    <input wire:model.defer="nik" type="nik" name="nik" class="input w-full border mt-2" placeholder="Nomor Induk Kependudukan" value="{{ $nik }}" >
+                                    <input wire:model.defer="nik" type="number" name="nik" class="input w-full border mt-2" placeholder="Nomor Induk Kependudukan" value="{{ $nik }}" >
                                     @error('nik') <span class="text-red-600">{{ $message }}</span> @enderror
                                 </div>
                                 <div class="mt-3">
@@ -80,11 +80,16 @@
 
                                 <div class="text-right">
                                     
-                                    @if($isLoading)  
-                                        <button class="button bg-theme-3 text-white mt-5 ml-auto cursor-wait">Proses Simpan Data...</button>
-                                    @else
-                                        <button type="submit" class="button bg-theme-3 text-white mt-5 ml-auto">Simpan Data Calon Ibu</button>
-                                    @endif
+                                    <button type="submit" class="flex button px-5 py-3 bg-purple text-white mt-5 ml-auto">
+                                        <div  wire:loading wire:target="submitPeserta">
+                                            <svg class="mr-3 h-5 w-5 animate-spin text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                        </div>  
+                                        Simpan Data Calon Ibu
+                                    </button>
+                                    
                                 </div>
                                 
                             </form>                            
@@ -104,18 +109,14 @@
                 </div>
                 <div class="p-5" id="basic-datepicker">
                     <div class="preview">
+                        <form wire:submit.prevent="store" enctype="multipart/form-data">
+                            @csrf                       
                             <div class="mt-2"> 
-                                <label class="flex flex-col sm:flex-row"> Posyandu </label>
-                                <select wire:model="posyanduID" class="input border mr-2 w-full">
-                                    <option value="">--- Pilih Periode Periksa ---</option>
-                                    @foreach ($posyandu as $p)
-                                        <option value="{{ $p->posyanduID}}" class="py-3">{{ $p->namaPosyandu}}</option>
-                                    @endforeach
-                                </select> 
-                            </div>
-                            <div class="mt-3"> 
                                 <label class="flex flex-col sm:flex-row"> Periode Periksa </label>
-                                <select wire:model="periode" class="input border mr-2 w-full">
+                                <select wire:model="periode" class="input border mr-2 w-full" 
+                                @if (!$idPeserta)
+                                disabled
+                                @endif>
                                     <option value="">--- Pilih Periode Periksa ---</option>
                                     <option value="1" class="py-3">Bulan Januari</option>
                                     <option value="2" class="py-3">Bulan Februari</option>
@@ -130,59 +131,81 @@
                                     <option value="11" class="py-3">Bulan November</option>
                                     <option value="12" class="py-3">Bulan Desember</option>
                                 </select> 
+                                @error('periode') <span class="text-red-600">{{ $message }}</span> @enderror
+                            </div>
+                            <div class="mt-3"> 
+                                <label class="flex flex-col sm:flex-row"> Posyandu </label>
+                                <select wire:model.defer="posyanduID" class="input border mr-2 w-full"
+                                @if (!$idPeserta)
+                                disabled
+                                @endif>
+                                    <option value="">--- Pilih Posyandu ---</option>
+                                    @foreach ($posyandu as $p)
+                                        <option value="{{ $p->posyanduID}}" class="py-3">{{ $p->namaPosyandu}}</option>
+                                    @endforeach
+                                </select> 
+                                @error('posyanduID') <span class="text-red-600">{{ $message }}</span> @enderror
                             </div>
                             @if($periode)
                                 <div class="mt-3">
                                     <label class="flex flex-col sm:flex-row"> Umur <span class="sm:ml-auto mt-1 sm:mt-0 text-xs text-gray-600">Required, Umur Calon Ibu</span> </label>
                                 </div>
                                 <div class="relative"> 
-                                    <input wire:model.defer="umur" type="number" name="umur" class="input pr-12 w-full border col-span-4"  required>
+                                    <input wire:model.defer="umur" type="number" name="umur" class="input pr-12 w-full border col-span-4" value="{{ $umur }}"  required>
                                     <div class="absolute top-0 right-0 rounded-r w-16 h-full flex items-center justify-center bg-gray-100 border text-gray-600">Tahun</div>
+                                    
                                 </div>
+                                @error('umur') <span class="text-red-600">{{ $message }}</span> @enderror
                                 <div class="mt-3">
                                     <label class="flex flex-col sm:flex-row"> Berat Badan <span class="sm:ml-auto mt-1 sm:mt-0 text-xs text-gray-600">Required, Berat Calon Ibu</span> </label>                               
                                 </div>
                                 <div class="relative"> 
-                                    <input wire:model.defer="beratBadan" type="text" class="input pr-12 w-full border col-span-4">
+                                    <input wire:model.defer="beratBadan" type="number" class="input pr-12 w-full border col-span-4" required>
                                     <div class="absolute top-0 right-0 rounded-r w-10 h-full flex items-center justify-center bg-gray-100 border text-gray-600">Kg</div>
                                 </div>
+                                @error('beratBadan') <span class="text-red-600">{{ $message }}</span> @enderror
                                 <div class="mt-3">
                                     <label class="flex flex-col sm:flex-row"> Tinggi Badan <span class="sm:ml-auto mt-1 sm:mt-0 text-xs text-gray-600">Required, Tinggi Calon Ibu</span> </label>                               
                                 </div>
                                 <div class="relative"> 
-                                    <input wire:model.defer="tinggiBadan" type="text" class="input pr-12 w-full border col-span-4">
+                                    <input wire:model.defer="tinggiBadan" type="number" class="input pr-12 w-full border col-span-4" required>
                                     <div class="absolute top-0 right-0 rounded-r w-10 h-full flex items-center justify-center bg-gray-100 border text-gray-600">Cm</div>
                                 </div>
+                                @error('tinggiBadan') <span class="text-red-600">{{ $message }}</span> @enderror
                                 <div class="mt-3">
                                     <label class="flex flex-col sm:flex-row"> Lingkar Pinggang <span class="sm:ml-auto mt-1 sm:mt-0 text-xs text-gray-600">Required, Lingkar Pinggang Calon Ibu</span> </label>                               
                                 </div>
                                 <div class="relative"> 
-                                    <input wire:model.defer="lingkarPinggang" type="text" class="input pr-12 w-full border col-span-4">
+                                    <input wire:model.defer="lingkarPinggang" type="number" class="input pr-12 w-full border col-span-4" required>
                                     <div class="absolute top-0 right-0 rounded-r w-10 h-full flex items-center justify-center bg-gray-100 border text-gray-600">Cm</div>
                                 </div>
+                                @error('lingkarPinggang') <span class="text-red-600">{{ $message }}</span> @enderror
                                 <div class="mt-3">
                                     <label class="flex flex-col sm:flex-row"> Lingkar Bokong <span class="sm:ml-auto mt-1 sm:mt-0 text-xs text-gray-600">Required, Lingkar Bokong Calon Ibu</span> </label>                               
                                 </div>
                                 <div class="relative"> 
-                                    <input wire:model.defer="lingkarBokong" type="text" class="input pr-12 w-full border col-span-4">
+                                    <input wire:model.defer="lingkarBokong" type="number" class="input pr-12 w-full border col-span-4" required>
                                     <div class="absolute top-0 right-0 rounded-r w-10 h-full flex items-center justify-center bg-gray-100 border text-gray-600">Cm</div>
                                 </div>
+                                @error('lingkarBokong') <span class="text-red-600">{{ $message }}</span> @enderror
                                 <div class="mt-3">
                                     <label class="flex flex-col sm:flex-row"> Lingkar Lengan <span class="sm:ml-auto mt-1 sm:mt-0 text-xs text-gray-600">Required, Lingkar Lengan Calon Ibu</span> </label>                               
                                 </div>
                                 <div class="relative"> 
-                                    <input wire:model.defer="lingkarLengan" type="text" class="input pr-12 w-full border col-span-4">
+                                    <input wire:model.defer="lingkarLengan" type="number" class="input pr-12 w-full border col-span-4" required>
                                     <div class="absolute top-0 right-0 rounded-r w-10 h-full flex items-center justify-center bg-gray-100 border text-gray-600">Cm</div>
                                 </div>
+                                @error('lingkarLengan') <span class="text-red-600">{{ $message }}</span> @enderror
                                 
                                 <div class="text-right">
                                     @if($idPeserta)
-                                        <button wire:click="store" class="button bg-theme-3 text-white mt-5 ml-auto">Simpan Data Periksa</button>
+                                        <button type="submit" class="button bg-purple px-5 py-3 text-white mt-5 ml-auto">Simpan Data Periksa</button>
                                     @else
-                                        <a href="javascript:;" class="tooltip button inline-block bg-gray-600 mt-5 text-white" title="Silahkan masukkan data calon Ibu terlebih dahulu!">Simpan Data Periksa</a>
+                                        <a href="javascript:;" class="tooltip button inline-block px-5 py-3 bg-gray-600 mt-5 text-white" title="Silahkan masukkan data calon Ibu terlebih dahulu!">Simpan Data Periksa</a>
                                     @endif
                                 </div>
                             @endif
+                        </form>
                     </div>
                 </div>
             </div>

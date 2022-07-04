@@ -20,13 +20,25 @@ License: You must have a valid license purchased only from themeforest(the above
     @yield('head')
 
     <!-- BEGIN: CSS Assets-->
-    <link rel="stylesheet" href="{{ asset('dist/css/app.css') }}" />
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ asset('dist/css/app.css') }}" />
     <!-- END: CSS Assets-->
     
-
+    
     @livewireStyles
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+          theme: {
+            extend: {
+              colors: {
+                purple: '#5C40CC',
+              }
+            }
+          }
+        }
+      </script>
     <!-- sweetalert -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.16/dist/sweetalert2.all.min.js"></script>
     <script src="sweetalert2.min.js"></script>
