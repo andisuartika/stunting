@@ -35,8 +35,9 @@ class BalitaIndex extends Component
     public $beratBalita;
     public $panjangBalita;
     public $lingkarKepalaBalita;
+    public $lingkarLenganBalita;
     public $asiEkslusif;
-    public $imunisasi;
+    public $imunisasi=[];
 
     public array $bayis=[];
     public array $ibus=[];
@@ -53,18 +54,17 @@ class BalitaIndex extends Component
      // ERROR MESS
      protected $messages = [
         'namaBalita.required' => 'Nama balita tidak boleh kosong.',
-        'nikBalita.required' => 'NIK tidak boleh kosong.',
         'queryIbu.required' => 'Ibu balita tidak boleh kosong.',
         'nik.min' => 'NIK harus 16 karakter.',
         'tglLahirBalita.required' => 'Tanggal Lahir tidak boleh kosong.',
         'JKBalita.required' => 'Pilih jenis kelamin balita.',
-        'file.required' => 'Silahkan upload kartu identitas anak.',
         'posyandu.required' => 'Silahkan pilih posyandu.',
         'imunisasi.required' => 'Silahkan pilih jenis Imunisasi.',
         'umurBalita.required' => 'Umur tidak boleh kosong',
         'beratBalita.required' => 'Berat badan tidak boleh kosong',
         'panjangBalita.required' => 'Panjang badan tidak boleh kosong',
         'lingkarPinggang.required' => 'Lingkar pinggang tidak boleh kosong',
+        'lingkarLengan.required' => 'Lingkar lengan tidak boleh kosong',
         'lingkarKepalaBalita.required' => 'Lingkar Kepala tidak boleh kosong',
     ];
 
@@ -82,22 +82,27 @@ class BalitaIndex extends Component
         {
             $year = Carbon::now()->year; 
             $periksa = BayiPeriksa::where('pesertaID',$this->idBalita)->whereYear('created_at',$year)->where('periode',(int)$this->periode)->first();
+
             if($periksa)
             {
+
                 $this->idPeriksa = $periksa->periksaID;
                 $this->umurBalita = $periksa->umur;
                 $this->beratBalita = $periksa->beratBadan;
                 $this->panjangBalita = $periksa->panjangBadan;
                 $this->lingkarKepalaBalita= $periksa->lingkarKepala;
+                $this->lingkarLenganBalita= $periksa->lingkarLengan;
                 $this->asiEkslusif = $periksa->asiEkslusif;
                 $this->imunisasi = $periksa->imunisasiID;
             }else{
                 $this->idPeriksa = '';
-                $this->umurBalita = '';
+                $this->umurBalita = Carbon::parse($this->bayi->tanggalLahir)->diff(Carbon::now())->m;
                 $this->beratBalita = '';
                 $this->panjangBalita = '';
                 $this->lingkarKepalaBalita= '';
+                $this->lingkarLenganBalita= '';
                 $this->asiEkslusif = '';
+                $this->imunisasi = [];
             }
         }
         
@@ -181,7 +186,7 @@ class BalitaIndex extends Component
         $this->validate([
             'namaBalita' => ['required'],
             'namaBalita' => ['required'],
-            'NIKBalita' => ['required','min:16'],
+            'NIKBalita' => ['min:16'],
             'tglLahirBalita' => ['required'],
             'JKBalita' => ['required'],
         ]);
@@ -211,7 +216,6 @@ class BalitaIndex extends Component
         }else{
             // CREATE BALITA BARU
             $this->validate([
-                'file' => ['required','image'],
                 'queryIbu' => ['required'],
             ]);
             
@@ -224,6 +228,12 @@ class BalitaIndex extends Component
                 // GET URL FILE
                 $url = Storage::disk('google')->url($res);
                 $fileBukti = $url;
+            }
+
+            if($this->NIKBalita){
+                $this->NIKBalita = $this->NIKBalita;
+            }else{
+                $this->NIKBalita= NULL;
             }
 
             $peserta = Peserta::create([
@@ -252,6 +262,7 @@ class BalitaIndex extends Component
             'beratBalita' => ['required','numeric'],
             'panjangBalita' => ['required','numeric'],
             'lingkarKepalaBalita' => ['required'],
+            'lingkarLenganBalita' => ['required'],
             'imunisasi' => ['required'],
         ]); 
 
@@ -265,8 +276,9 @@ class BalitaIndex extends Component
             $balita->beratBadan = $this->beratBalita;
             $balita->panjangBadan = $this->panjangBalita;
             $balita->lingkarKepala = $this->lingkarKepalaBalita;
+            $balita->lingkarLengan = $this->lingkarLenganBalita;
             $balita->asiEkslusif = $this->asiEkslusif;
-            $balita->imunisasiID = $this->imunisasi;
+            $balita->imunisasiID = array_map('intval', $this->imunisasi);
             $balita->userID = Auth::user()->id;
 
             $balita->save();
@@ -281,8 +293,9 @@ class BalitaIndex extends Component
                 'beratBadan' => $this->beratBalita,
                 'panjangBadan' => $this->panjangBalita,
                 'lingkarKepala' => $this->lingkarKepalaBalita,
+                'lingkarLengan' => $this->lingkarLenganBalita,
                 'asiEkslusif' => $this->asiEkslusif,
-                'imunisasiID' => $this->imunisasi,
+                'imunisasiID' => array_map('intval', $this->imunisasi),
                 'userID' => Auth::user()->id,
                 'tanggal' => Carbon::now(),
             ]);
@@ -314,5 +327,7 @@ class BalitaIndex extends Component
         $this->JKBalita= '';
         $this->queryIbu='';
         $this->urlFile='';
+        $this->periode='';
+        $this->posyandu='';
     }
 }

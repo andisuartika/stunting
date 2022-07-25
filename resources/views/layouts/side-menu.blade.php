@@ -55,6 +55,12 @@
                         <div class="side-menu__title"> Balita </div>
                     </a>
                 </li>
+                <li>
+                    <a href="{{ route('data-balita') }}" class="side-menu @yield('data-balita')">
+                        <div class="side-menu__icon"> <i data-feather="users"></i> </div>
+                        <div class="side-menu__title"> Data Balita </div>
+                    </a>
+                </li>
                          
             </ul>
         </nav>

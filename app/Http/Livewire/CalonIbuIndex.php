@@ -21,6 +21,7 @@ class CalonIbuIndex extends Component
     public $nik;
     public $tglLahir;
     public $umur;
+    public $tekananDarah;
     public $beratBadan;
     public $tinggiBadan;
     public $lingkarPinggang;
@@ -50,9 +51,9 @@ class CalonIbuIndex extends Component
         'nik.required' => 'NIK tidak boleh kosong.',
         'nik.min' => 'NIK harus 16 karakter.',
         'tglLahir.required' => 'Tanggal Lahir tidak boleh kosong.',
-        'file.required' => 'Silahkan upload kartu keluarga.',
         'posyanduID.required' => 'Silahkan pilih posyandu.',
         'umur.required' => 'Umur tidak boleh kosong',
+        'tekananDarah.required' => 'Tekanan darah tidak boleh kosong',
         'beratBadan.required' => 'Berat badan tidak boleh kosong',
         'tinggiBadan.required' => 'Tinggi badan tidak boleh kosong',
         'lingkarPinggang.required' => 'Lingkar pinggang tidak boleh kosong',
@@ -72,10 +73,12 @@ class CalonIbuIndex extends Component
         {
             $year = Carbon::now()->year; 
             $periksa = IbuPeriksa::where('pesertaID',$this->idPeserta)->whereYear('created_at',$year)->where('periode',(int)$this->periode)->first();
+
             if($periksa)
             {
                 $this->idPeriksa = $periksa->periksaID;
                 $this->umur = $periksa->umur;
+                $this->tekananDarah = $periksa->tekananDarah;
                 $this->lingkarPinggang = $periksa->lingkarPinggang;
                 $this->lingkarBokong = $periksa->lingkarBokong;
                 $this->lingkarLengan = $periksa->lingkarLengan;
@@ -83,7 +86,8 @@ class CalonIbuIndex extends Component
                 $this->beratBadan = $periksa->beratBadan;
             }else{
                 $this->idPeriksa = '';
-                $this->umur = '';
+                $this->umur = Carbon::parse($this->peserta->tanggalLahir)->diff(Carbon::now())->y;
+                $this->tekananDarah = '';
                 $this->lingkarPinggang = '';
                 $this->lingkarBokong = '';
                 $this->lingkarLengan = '';
@@ -99,17 +103,9 @@ class CalonIbuIndex extends Component
     {
         $this->query = '';
         $this->showDropdown = true;
+        $this->selectedPeserta = 0;
     }
 
-    public function hideDataPeserta()
-    {
-        $this->showDataPeserta = false;
-    }
-
-    public function hideDropdown()
-    {
-        $this->showDropdown = false;
-    }
 
     public function updatedQuery()
     {
@@ -175,9 +171,6 @@ class CalonIbuIndex extends Component
             $this->selectPeserta($calonIbu->pesertaID);
         }else{
             // CREATE PESERTA BARU
-            $this->validate([
-                'file' => ['required','image'],
-            ]);
             
             $fileBukti = '';
             $filename = 'KK-'.$this->nik;
@@ -211,6 +204,7 @@ class CalonIbuIndex extends Component
             'posyanduID' => ['required'],
             'periode' => ['required'],
             'umur' => ['required','numeric'],
+            'tekananDarah' => ['required'],
             'lingkarPinggang' => ['required','numeric'],
             'lingkarBokong' => ['required','numeric'],
             'lingkarLengan' => ['required','numeric'],
@@ -227,6 +221,7 @@ class CalonIbuIndex extends Component
             $ibuPeriksa->posyanduID = $this->posyanduID;
             $ibuPeriksa->periode = $this->periode;
             $ibuPeriksa->umur = $this->umur;
+            $ibuPeriksa->tekananDarah = $this->tekananDarah;
             $ibuPeriksa->lingkarPinggang = $this->lingkarPinggang;
             $ibuPeriksa->lingkarBokong = $this->lingkarBokong;
             $ibuPeriksa->lingkarLengan = $this->lingkarLengan;
@@ -245,6 +240,7 @@ class CalonIbuIndex extends Component
                 'pesertaID' => $this->idPeserta,
                 'periode' => $this->periode,
                 'umur' => $this->umur,
+                'tekananDarah' => $this->tekananDarah,
                 'lingkarPinggang' => $this->lingkarPinggang,
                 'lingkarBokong' => $this->lingkarBokong,
                 'lingkarLengan' => $this->lingkarLengan,

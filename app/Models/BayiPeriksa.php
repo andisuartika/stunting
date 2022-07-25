@@ -10,6 +10,9 @@ class BayiPeriksa extends Model
     use HasFactory;
     protected $primaryKey = 'periksaID';
     protected $guarded = [];
+    protected $casts = [
+        'imunisasiID' => 'array'
+    ];
 
     public function peserta()
     {

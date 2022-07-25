@@ -69,7 +69,7 @@
                                     @error('tglLahir') <span class="text-red-600">{{ $message }}</span> @enderror
                                 </div>
                                 <div  class="mt-3">
-                                    <label class="flex flex-col sm:flex-row"> Upload Kartu Keluarga <span class="sm:ml-auto mt-1 sm:mt-0 text-xs text-gray-600">Required, JPG | JPEG | PNG</span> </label>
+                                    <label class="flex flex-col sm:flex-row"> Upload Kartu Keluarga <span class="sm:ml-auto mt-1 sm:mt-0 text-xs text-gray-600">Optional, JPG | JPEG | PNG</span> </label>
                                     <input wire:model="file" class="input  w-full border" type="file">
                                     @error('file') <span class="text-red-600">{{ $message }}</span> @enderror
                                     @if ($urlFile)
@@ -148,14 +148,21 @@
                             </div>
                             @if($periode)
                                 <div class="mt-3">
-                                    <label class="flex flex-col sm:flex-row"> Umur <span class="sm:ml-auto mt-1 sm:mt-0 text-xs text-gray-600">Required, Umur Calon Ibu</span> </label>
+                                    <label class="flex flex-col sm:flex-row"> Umur <span class="sm:ml-auto mt-1 sm:mt-0 text-xs text-gray-600">Umur Calon Ibu</span> </label>
                                 </div>
                                 <div class="relative"> 
-                                    <input wire:model.defer="umur" type="number" name="umur" class="input pr-12 w-full border col-span-4" value="{{ $umur }}"  required>
+                                    <input wire:model.defer="umur" type="number" name="umur" class="input pr-12 w-full border col-span-4" value="{{ $umur }}"  required disabled>
                                     <div class="absolute top-0 right-0 rounded-r w-16 h-full flex items-center justify-center bg-gray-100 border text-gray-600">Tahun</div>
                                     
                                 </div>
-                                @error('umur') <span class="text-red-600">{{ $message }}</span> @enderror
+                                <div class="mt-3">
+                                    <label class="flex flex-col sm:flex-row"> Tekanan Darah <span class="sm:ml-auto mt-1 sm:mt-0 text-xs text-gray-600">Required, Tekanan Darah Calon Ibu</span> </label>
+                                </div>
+                                <div class="relative">
+                                    <input wire:model.defer="tekananDarah" type="text" name="tekananDarah" class="input pr-12 w-full border col-span-4" value="{{ $tekananDarah }}" placeholder="120/80" required >
+                                    <div class="absolute top-0 right-0 rounded-r w-16 h-full flex items-center justify-center bg-gray-100 border text-gray-600">mmHg</div>
+                                </div>
+                                @error('tekananDarah') <span class="text-red-600">{{ $message }}</span> @enderror
                                 <div class="mt-3">
                                     <label class="flex flex-col sm:flex-row"> Berat Badan <span class="sm:ml-auto mt-1 sm:mt-0 text-xs text-gray-600">Required, Berat Calon Ibu</span> </label>                               
                                 </div>

@@ -94,12 +94,14 @@
                                         @error('namaBalita') <span class="text-red-600">{{ $message }}</span> @enderror
                                     </div>
                                     <div class="mt-3">
-                                        <label class="flex flex-col sm:flex-row"> NIK <span class="sm:ml-auto mt-1 sm:mt-0 text-xs text-gray-600">Required, NIK sesuai dengan KK</span> </label>
-                                        <input wire:model.defer="NIKBalita" type="number" name="NIKBalita" class="input w-full border" placeholder="Nomor Induk Kependudukan"  required>
+                                        <label class="flex flex-col sm:flex-row"> NIK <span class="sm:ml-auto mt-1 sm:mt-0 text-xs text-gray-600">Optional, NIK sesuai dengan KK</span> </label>
+                                        <input wire:model.defer="NIKBalita" type="number" name="NIKBalita" class="input w-full border" placeholder="Nomor Induk Kependudukan" >
+                                        @error('NIKBalita') <span class="text-red-600">{{ $message }}</span> @enderror
                                     </div>
                                     <div class="mt-3">
                                         <label class="flex flex-col sm:flex-row"> Tanggal Lahir <span class="sm:ml-auto mt-1 sm:mt-0 text-xs text-gray-600">Required, Tangal Lahir Ibu</span> </label>
                                         <input wire:model.defer="tglLahirBalita" data-timepicker="true" type="date" name="date" class="input  w-full border" placeholder="MM/DD/YYYY" required>
+                                        @error('tglLahirBalita') <span class="text-red-600">{{ $message }}</span> @enderror
                                     </div>
                                     <div class="mt-3"> <label>Jenis Kelamin</label>
                                         <div class="flex flex-col sm:flex-row mt-2">
@@ -115,7 +117,7 @@
                                         @error('JKBalita') <span class="text-red-600">{{ $message }}</span> @enderror
                                     </div>
                                     <div  class="mt-3">
-                                        <label class="flex flex-col sm:flex-row"> Upload Kartu Identitas Anak <span class="sm:ml-auto mt-1 sm:mt-0 text-xs text-gray-600">Required, JPG | JPEG | PNG</span> </label>
+                                        <label class="flex flex-col sm:flex-row"> Upload Kartu Identitas Anak <span class="sm:ml-auto mt-1 sm:mt-0 text-xs text-gray-600">Optional, JPG | JPEG | PNG</span> </label>
                                         <input wire:model="file" class="input  w-full border" type="file">
                                         @error('file') <span class="text-red-600">{{ $message }}</span> @enderror
                                         @if ($urlFile)
@@ -222,10 +224,10 @@
                             </div>
                             @if ($periode)
                                 <div class="mt-3">
-                                    <label class="flex flex-col sm:flex-row"> Umur <span class="sm:ml-auto mt-1 sm:mt-0 text-xs text-gray-600">Required, Umur Balita</span> </label>
+                                    <label class="flex flex-col sm:flex-row"> Umur <span class="sm:ml-auto mt-1 sm:mt-0 text-xs text-gray-600">Umur Balita</span> </label>
                                 </div>
                                 <div class="relative"> 
-                                    <input wire:model.defer="umurBalita" type="number" name="umur" class="input pr-12 w-full border col-span-4"  required>
+                                    <input wire:model.defer="umurBalita" type="number" name="umur" class="input pr-12 w-full border col-span-4"  required disabled>
                                     <div class="absolute top-0 right-0 rounded-r w-16 h-full flex items-center justify-center bg-gray-100 border text-gray-600">Bulan</div>
                                 </div>
                                 <div class="mt-3">
@@ -240,6 +242,13 @@
                                 </div>
                                 <div class="relative"> 
                                     <input wire:model.defer="panjangBalita" type="number" class="input pr-12 w-full border col-span-4" required>
+                                    <div class="absolute top-0 right-0 rounded-r w-10 h-full flex items-center justify-center bg-gray-100 border text-gray-600">Cm</div>
+                                </div>
+                                <div class="mt-3">
+                                    <label class="flex flex-col sm:flex-row"> Lingkar Lengan <span class="sm:ml-auto mt-1 sm:mt-0 text-xs text-gray-600">Required, Lingkar Lengan Balita</span> </label>                               
+                                </div>
+                                <div class="relative"> 
+                                    <input wire:model.defer="lingkarLenganBalita" type="number" class="input pr-12 w-full border col-span-4" required>
                                     <div class="absolute top-0 right-0 rounded-r w-10 h-full flex items-center justify-center bg-gray-100 border text-gray-600">Cm</div>
                                 </div>
                                 <div class="mt-3">
@@ -260,12 +269,12 @@
                                     <label class="flex flex-col sm:flex-row">Imunisasi <span class="sm:ml-auto mt-1 sm:mt-0 text-xs text-gray-600">Required, Jenis Imunisasi</span>
                                     </label>
                                     <div class="mt-2"> 
-                                        <select wire:model.defer="imunisasi" class="input border mr-2 w-full">
-                                            <option value="">--- Pilih Jenis Imunisasi ---</option>
-                                            @foreach ($imunisasis as $imu)
-                                                    <option value="{{ $imu->imunisasiID }}">{{ $imu->imunisasi }}</option>
-                                            @endforeach
-                                        </select> 
+                                        @foreach ($imunisasis as $imu)
+                                            <div class="flex items-center text-gray-700 mt-2"> 
+                                                <input wire:model.defer="imunisasi" type="checkbox" class="input border mr-2" value="{{ $imu->imunisasiID }}"> 
+                                                <label class="cursor-pointer select-none" for="vertical-checkbox-chris-evans">{{ $imu->imunisasi }}</label>
+                                            </div>
+                                        @endforeach
                                         @error('imunisasi') <span class="text-red-600">{{ $message }}</span> @enderror
                                     </div>
                                 </div>

@@ -17,6 +17,8 @@ class CalonIbuController extends Controller
         $data = $request->all();
         $query = $data['query'];
 
+        $articles = article::where('status','show')->count();
+
         $filter_data = Peserta::where('jenisKelamin', 'P')->where('nama','LIKE','%'.$query.'%')->get();
 
         return response()->json($filter_data);

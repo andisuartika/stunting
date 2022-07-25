@@ -40,6 +40,10 @@ Route::middleware([
     Route::get('/balita', function(){
         return view('pages.balita');
     })->name('balita');
+
+    Route::get('/data-balita', function(){
+        return view('pages.data-balita');
+    })->name('data-balita');
 });
 
 Route::get('test', function() {

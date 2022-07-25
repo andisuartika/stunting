@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Balita;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Peserta extends Model
 {
@@ -24,5 +25,10 @@ class Peserta extends Model
     public function bayiPeriksa()
     {
         return $this->hasMany(User::class, 'pesertaID', 'pesertaID');
+    }
+
+    public function balitas()
+    {
+        return $this->hasMany(Balita::class, 'ibuID', 'pesertaID');
     }
 }
